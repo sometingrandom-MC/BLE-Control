@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
@@ -56,6 +58,16 @@ fun MainScreen(car: Car) {
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 InverterTile(car = car, modifier = Modifier.weight(1f))
+                
+                // Battery Voltage Tile
+                QuickSettingTile(
+                    modifier = Modifier.weight(1f),
+                    title = "Battery",
+                    subtitle = "%.1f V".format(car.battery.getVoltage()),
+                    isActive = false, // Always off/neutral
+                    onClick = { },
+                    icon = Icons.Default.BatteryFull
+                )
             }
         }
     }

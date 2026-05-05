@@ -75,10 +75,15 @@ sealed class Screen(val title: String, val icon: ImageVector) {
 
 @Composable
 fun MainContent() {
+    val context = LocalContext.current
     var currentScreenTitle by rememberSaveable { mutableStateOf(Screen.Main.title) }
     
-    // Instantiate Car object to share state between screens
+    // Instantiate Car and BleController to share state between screens
     val car = remember { Car() }
+    val bleController = remember { BleController(context) }
+    
+    // Connect them
+    car.bleController = bleController
     
     val items = listOf(Screen.Main, Screen.Controls, Screen.Settings)
     val currentScreen = items.find { it.title == currentScreenTitle } ?: Screen.Main
@@ -98,7 +103,7 @@ fun MainContent() {
         when (currentScreen) {
             Screen.Main -> MainScreen(car)
             Screen.Controls -> ControlsScreen(car)
-            Screen.Settings -> SettingsScreen()
+            Screen.Settings -> SettingsScreen(bleController)
         }
     }
 }
