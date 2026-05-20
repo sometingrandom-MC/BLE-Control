@@ -10,6 +10,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.util.*
@@ -19,9 +20,35 @@ class BleController(private val context: Context) {
     private val bluetoothAdapter = bluetoothManager.adapter
     private var bluetoothGatt: BluetoothGatt? = null
 
+    private val prefs = context.getSharedPreferences("ble_prefs", Context.MODE_PRIVATE)
+
     var isConnected by mutableStateOf(false)
     var isScanning by mutableStateOf(false)
     var deviceName by mutableStateOf("Not Connected")
+    
+    val foundDevices = mutableStateListOf<BluetoothDevice>()
+
+    private var _targetDeviceName = mutableStateOf(prefs.getString("target_device_name", null))
+    var targetDeviceName: String?
+        get() = _targetDeviceName.value
+        set(value) {
+            _targetDeviceName.value = value
+            prefs.edit().putString("target_device_name", value).apply()
+        }
+
+    private val reconnectHandler = Handler(Looper.getMainLooper())
+    private val reconnectRunnable = object : Runnable {
+        override fun run() {
+            if (!isConnected && !isScanning) {
+                targetDeviceName?.let { startScan(it) }
+            }
+            reconnectHandler.postDelayed(this, 10000)
+        }
+    }
+
+    init {
+        reconnectHandler.post(reconnectRunnable)
+    }
 
     interface BleCallback {
         fun onValueUpdated(characteristicUuid: UUID, value: ByteArray)
@@ -122,17 +149,23 @@ class BleController(private val context: Context) {
     }
 
     @SuppressLint("MissingPermission")
-    fun startScan(targetDeviceName: String) {
+    fun startScan(targetName: String? = null) {
         if (isScanning) return
         isScanning = true
-        val scanner = bluetoothAdapter.bluetoothLeScanner
+        foundDevices.clear()
+        val scanner = bluetoothAdapter.bluetoothLeScanner ?: return
         val settings = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
         
         currentScanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType: Int, result: ScanResult) {
-                if (result.device.name == targetDeviceName) {
+                val device = result.device
+                if (device.name != null && !foundDevices.any { it.address == device.address }) {
+                    foundDevices.add(device)
+                }
+                
+                if (targetName != null && device.name == targetName) {
                     stopScan()
-                    connect(result.device.address)
+                    connect(device.address)
                 }
             }
         }
