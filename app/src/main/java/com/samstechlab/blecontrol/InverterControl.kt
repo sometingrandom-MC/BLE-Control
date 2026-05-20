@@ -52,6 +52,7 @@ fun InverterTile(car: Car, modifier: Modifier = Modifier) {
         title = "Inverter",
         subtitle = statusText + modeText,
         isActive = powerState,
+        isAutoMode = automaticMode,
         onClick = {
             car.inverter.setState(!powerState)
         },
@@ -87,7 +88,8 @@ fun InverterSwitchCard(car: Car, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp)),
+            .clip(RoundedCornerShape(24.dp))
+            .aiGlow(automaticMode, 24.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
