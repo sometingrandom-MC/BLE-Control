@@ -165,7 +165,7 @@ fun MainContent() {
         when (currentScreen) {
             Screen.Main -> MainScreen(car)
             Screen.Controls -> ControlsScreen(car)
-            Screen.Settings -> SettingsScreen(bleController)
+            Screen.Settings -> SettingsScreen(car)
         }
     }
 }
