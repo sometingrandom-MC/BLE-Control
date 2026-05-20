@@ -3,7 +3,6 @@ package com.samstechlab.blecontrol
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.filled.PowerOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -29,8 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -77,7 +75,6 @@ fun InverterTile(car: Car, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InverterSwitchCard(car: Car, modifier: Modifier = Modifier) {
-    val haptic = LocalHapticFeedback.current
     val powerState = car.inverter.getState()
     val automaticMode = car.inverter.getAutoMode()
 
@@ -90,14 +87,7 @@ fun InverterSwitchCard(car: Car, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .combinedClickable(
-                onClick = { },
-                onLongClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    car.inverter.setAutoMode(!automaticMode)
-                }
-            ),
+            .clip(RoundedCornerShape(24.dp)),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
@@ -108,7 +98,7 @@ fun InverterSwitchCard(car: Car, modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -151,9 +141,8 @@ fun InverterSwitchCard(car: Car, modifier: Modifier = Modifier) {
                                 fontWeight = FontWeight.Bold
                             )
                             val statusText = if (powerState) "Running" else "Stopped"
-                            val modeText = if (automaticMode) " • Auto Mode" else ""
                             Text(
-                                text = statusText + modeText,
+                                text = statusText,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
