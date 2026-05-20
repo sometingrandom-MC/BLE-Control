@@ -33,7 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -100,55 +100,62 @@ fun Modifier.aiGlow(
         label = "glowAlpha"
     )
 
-    return this.drawBehind {
-        if (glowAlpha > 0f) {
-            // Blob 1: Deep Purple
-            drawRoundRect(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF9B72CB).copy(alpha = 0.3f * glowAlpha),
-                        Color.Transparent
-                    ),
-                    center = Offset(t1 * size.width, t2 * size.height),
-                    radius = size.maxDimension * 0.7f
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-            )
-            // Blob 2: Electric Blue
-            drawRoundRect(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF4285F4).copy(alpha = 0.2f * glowAlpha),
-                        Color.Transparent
-                    ),
-                    center = Offset((1 - t2) * size.width, t3 * size.height),
-                    radius = size.maxDimension * 0.8f
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-            )
-            // Blob 3: Cyan Accent
-            drawRoundRect(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        Color(0xFF00BCD4).copy(alpha = 0.15f * glowAlpha * pulse),
-                        Color.Transparent
-                    ),
-                    center = Offset(t3 * size.width, (1 - t1) * size.height),
-                    radius = size.maxDimension * 0.6f
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-            )
+    return this.drawWithCache {
+        val cornerRadiusPx = cornerRadius.toPx()
+        val strokeWidth = 2.dp.toPx()
+        val stroke = Stroke(width = strokeWidth)
+        val rectCornerRadius = CornerRadius(cornerRadiusPx)
 
-            // Internal glowing border
-            drawRoundRect(
-                brush = Brush.sweepGradient(
-                    colors = listOf(Color(0xFF9B72CB), Color(0xFF4285F4), Color(0xFF9B72CB)),
-                    center = Offset(t2 * size.width, t1 * size.height)
-                ),
-                cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx()),
-                style = Stroke(width = 2.dp.toPx()),
-                alpha = 0.2f * glowAlpha
-            )
+        onDrawBehind {
+            if (glowAlpha > 0f) {
+                // Blob 1: Deep Purple
+                drawRoundRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF9B72CB).copy(alpha = 0.3f * glowAlpha),
+                            Color.Transparent
+                        ),
+                        center = Offset(t1 * size.width, t2 * size.height),
+                        radius = size.maxDimension * 0.7f
+                    ),
+                    cornerRadius = rectCornerRadius
+                )
+                // Blob 2: Electric Blue
+                drawRoundRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF4285F4).copy(alpha = 0.2f * glowAlpha),
+                            Color.Transparent
+                        ),
+                        center = Offset((1 - t2) * size.width, t3 * size.height),
+                        radius = size.maxDimension * 0.8f
+                    ),
+                    cornerRadius = rectCornerRadius
+                )
+                // Blob 3: Cyan Accent
+                drawRoundRect(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color(0xFF00BCD4).copy(alpha = 0.15f * glowAlpha * pulse),
+                            Color.Transparent
+                        ),
+                        center = Offset(t3 * size.width, (1 - t1) * size.height),
+                        radius = size.maxDimension * 0.6f
+                    ),
+                    cornerRadius = rectCornerRadius
+                )
+
+                // Internal glowing border
+                drawRoundRect(
+                    brush = Brush.sweepGradient(
+                        colors = listOf(Color(0xFF9B72CB), Color(0xFF4285F4), Color(0xFF9B72CB)),
+                        center = Offset(t2 * size.width, t1 * size.height)
+                    ),
+                    cornerRadius = rectCornerRadius,
+                    style = stroke,
+                    alpha = 0.2f * glowAlpha
+                )
+            }
         }
     }
 }
