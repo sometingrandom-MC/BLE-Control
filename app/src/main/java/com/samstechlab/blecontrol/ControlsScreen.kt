@@ -17,6 +17,7 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,9 +36,14 @@ fun ControlsScreen(car: Car) {
                         "Controls",
                         fontWeight = FontWeight.Bold,
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        }
+        },
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -46,51 +52,9 @@ fun ControlsScreen(car: Car) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            InverterSwitchCard(car = car)
+            StaggeredEntrance(index = 0) {
+                InverterSwitchCard(car = car)
+            }
         }
-    }
-    Box(
-        Modifier
-            .fillMaxSize()
-            .padding(bottom = 16.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        val ble = car.bleController
-        val isConnected = ble?.isConnected ?: false
-        val isScanning = ble?.isScanning ?: false
-
-        val statusText = when {
-            isConnected -> "Connected"
-            isScanning -> "Scanning..."
-            else -> "Disconnected"
-        }
-
-        val statusColor = when {
-            isConnected -> Color(0xFF4CAF50) // Green
-            isScanning -> Color(0xFFFFC107) // Amber
-            else -> MaterialTheme.colorScheme.error
-        }
-
-        AssistChip(
-            label = { Text(statusText) },
-            onClick = {
-                if (!isConnected && !isScanning) {
-                    ble?.targetDeviceName?.let { ble.startScan(it) } ?: ble?.startScan()
-                }
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.Filled.Circle,
-                    contentDescription = null,
-                    tint = statusColor,
-                    modifier = Modifier.size(10.dp)
-                )
-            },
-            shape = RoundedCornerShape(25.dp),
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-            )
-        )
     }
 }

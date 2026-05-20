@@ -8,9 +8,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,12 +27,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -34,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -48,6 +60,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -80,12 +93,66 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val context = LocalContext.current
+            val car = remember { Car() }
+            val bleController = remember { BleController(context) }
+            car.bleController = bleController
+
             BLEControlTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    MainContent()
+                Box(modifier = Modifier.fillMaxSize()) {
+                    AnimatedBackground()
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        color = Color.Transparent
+                    ) {
+                        MainContent(car, bleController)
+                    }
+
+                    // Global Persistent Status Chip
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(bottom = 100.dp), // Height above navigation bar
+                        contentAlignment = Alignment.BottomCenter
+                    ) {
+                        val isConnected = bleController.isConnected
+                        val isScanning = bleController.isScanning
+
+                        val statusText = when {
+                            isConnected -> "Connected"
+                            isScanning -> "Scanning..."
+                            else -> "Disconnected"
+                        }
+
+                        val statusColor = when {
+                            isConnected -> Color(0xFF4CAF50) // Green
+                            isScanning -> Color(0xFFFFC107) // Amber
+                            else -> MaterialTheme.colorScheme.error
+                        }
+
+                        AssistChip(
+                            label = { Text(statusText) },
+                            onClick = {
+                                if (!isConnected && !isScanning) {
+                                    bleController.targetDeviceName?.let { bleController.startScan(it) } ?: bleController.startScan()
+                                }
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    Icons.Filled.Circle,
+                                    contentDescription = null,
+                                    tint = statusColor,
+                                    modifier = Modifier.size(10.dp)
+                                )
+                            },
+                            shape = RoundedCornerShape(25.dp),
+                            border = null,
+                            colors = AssistChipDefaults.assistChipColors(
+                                containerColor = Color.Transparent
+                            ),
+                            modifier = Modifier.glassEffect(cornerRadius = 25.dp, alpha = 0.2f)
+                        )
+                    }
                 }
             }
         }
@@ -99,16 +166,9 @@ sealed class Screen(val title: String, val icon: ImageVector) {
 }
 
 @Composable
-fun MainContent() {
+fun MainContent(car: Car, bleController: BleController) {
     val context = LocalContext.current
     var currentScreenTitle by rememberSaveable { mutableStateOf(Screen.Main.title) }
-    
-    // Instantiate Car and BleController to share state between screens
-    val car = remember { Car() }
-    val bleController = remember { BleController(context) }
-    
-    // Connect them
-    car.bleController = bleController
     
     val showDevicePicker = bleController.targetDeviceName == null
 
@@ -158,12 +218,27 @@ fun MainContent() {
                     onClick = { currentScreenTitle = screen.title }
                 )
             }
-        }
+        },
+        containerColor = Color.Transparent,
+        navigationSuiteColors = NavigationSuiteDefaults.colors(
+            navigationBarContainerColor = Color.Transparent,
+            navigationRailContainerColor = Color.Transparent
+        )
     ) {
-        when (currentScreen) {
-            Screen.Main -> MainScreen(car)
-            Screen.Controls -> ControlsScreen(car)
-            Screen.Settings -> SettingsScreen(car)
+        AnimatedContent(
+            targetState = currentScreen,
+            transitionSpec = {
+                (slideInVertically { height -> height / 12 } + fadeIn(animationSpec = tween(600)))
+                    .togetherWith(fadeOut(animationSpec = tween(400)))
+            },
+            label = "screenTransition",
+            modifier = Modifier.fillMaxSize()
+        ) { screen ->
+            when (screen) {
+                Screen.Main -> MainScreen(car)
+                Screen.Controls -> ControlsScreen(car)
+                Screen.Settings -> SettingsScreen(car)
+            }
         }
     }
 }
@@ -246,7 +321,10 @@ fun DeviceSelectionDialog(
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
+    val context = LocalContext.current
+    val car = remember { Car() }
+    val bleController = remember { BleController(context) }
     BLEControlTheme {
-        MainContent()
+        MainContent(car, bleController)
     }
 }

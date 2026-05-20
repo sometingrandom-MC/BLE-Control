@@ -55,72 +55,32 @@ fun MainScreen(car: Car) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Quick Settings",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                InverterTile(car = car, modifier = Modifier.weight(1f))
-                
-                // Battery Voltage Tile
-                QuickSettingTile(
-                    modifier = Modifier.weight(1f),
-                    title = "Battery",
-                    subtitle = "%.1f V".format(car.battery.getVoltage()),
-                    isActive = false, // Always off/neutral
-                    onClick = { },
-                    icon = Icons.Default.BatteryFull
+            StaggeredEntrance(index = 0) {
+                Text(
+                    text = "Quick Settings",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        }
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(bottom = 16.dp),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            val ble = car.bleController
-            val isConnected = ble?.isConnected ?: false
-            val isScanning = ble?.isScanning ?: false
 
-            val statusText = when {
-                isConnected -> "Connected"
-                isScanning -> "Scanning..."
-                else -> "Disconnected"
-            }
+            StaggeredEntrance(index = 1) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    InverterTile(car = car, modifier = Modifier.weight(1f))
 
-            val statusColor = when {
-                isConnected -> Color(0xFF4CAF50) // Green
-                isScanning -> Color(0xFFFFC107) // Amber
-                else -> MaterialTheme.colorScheme.error
-            }
-
-            AssistChip(
-                label = { Text(statusText) },
-                onClick = {
-                    if (!isConnected && !isScanning) {
-                        ble?.targetDeviceName?.let { ble.startScan(it) } ?: ble?.startScan()
-                    }
-                },
-                leadingIcon = {
-                    Icon(
-                        Icons.Filled.Circle,
-                        contentDescription = null,
-                        tint = statusColor,
-                        modifier = Modifier.size(10.dp)
+                    // Battery Voltage Tile
+                    QuickSettingTile(
+                        modifier = Modifier.weight(1f),
+                        title = "Battery",
+                        subtitle = "%.1f V".format(car.battery.getVoltage()),
+                        isActive = false, // Always off/neutral
+                        onClick = { },
+                        icon = Icons.Default.BatteryFull
                     )
-                },
-                shape = RoundedCornerShape(25.dp),
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-                )
-            )
+                }
+            }
         }
     }
 }

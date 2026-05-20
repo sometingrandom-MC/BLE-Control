@@ -13,7 +13,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -172,16 +171,6 @@ fun QuickSettingTile(
     val view = LocalView.current
     val haptic = LocalHapticFeedback.current
 
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isActive) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant
-        },
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "backgroundColor",
-    )
-
     val contentColor by animateColorAsState(
         targetValue = if (isActive) {
             MaterialTheme.colorScheme.onPrimaryContainer
@@ -220,7 +209,11 @@ fun QuickSettingTile(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(cornerRadius))
-                .background(backgroundColor)
+                .glassEffect(
+                    cornerRadius = cornerRadius,
+                    alpha = if (isActive) 0.2f else 0.1f,
+                    color = if (isActive) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                )
                 .aiGlow(isAutoMode, cornerRadius)
                 .combinedClickable(
                     interactionSource = interactionSource,

@@ -29,6 +29,7 @@ import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,9 +51,14 @@ fun SettingsScreen(car: Car) {
                         "Settings",
                         fontWeight = FontWeight.Bold,
                     )
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                )
             )
-        }
+        },
+        containerColor = Color.Transparent
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -61,92 +67,56 @@ fun SettingsScreen(car: Car) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Text(
-                text = "Device Connection",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            BluetoothSettingsCard(bleController)
-
-            Text(
-                text = "Application",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp)
-            )
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp)),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            StaggeredEntrance(index = 0) {
+                Text(
+                    text = "Device Connection",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+            }
+
+            StaggeredEntrance(index = 1) {
+                BluetoothSettingsCard(bleController)
+            }
+
+            StaggeredEntrance(index = 2) {
+                Text(
+                    text = "Application",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+
+            StaggeredEntrance(index = 3) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
+                        .glassEffect(cornerRadius = 24.dp, alpha = 0.1f),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.Transparent
+                    )
                 ) {
-                    Text(
-                        text = "More features coming soon",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "More control and configuration options will be added shortly.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "More features coming soon",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "More control and configuration options will be added shortly.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
-    }
-
-    // Bottom Status Chip
-    Box(
-        Modifier
-            .fillMaxSize()
-            .padding(bottom = 16.dp),
-        contentAlignment = Alignment.BottomCenter
-    ) {
-        val isConnected = bleController.isConnected
-        val isScanning = bleController.isScanning
-
-        val statusText = when {
-            isConnected -> "Connected"
-            isScanning -> "Scanning..."
-            else -> "Disconnected"
-        }
-
-        val statusColor = when {
-            isConnected -> Color(0xFF4CAF50) // Green
-            isScanning -> Color(0xFFFFC107) // Amber
-            else -> MaterialTheme.colorScheme.error
-        }
-
-        AssistChip(
-            label = { Text(statusText) },
-            onClick = {
-                if (!isConnected && !isScanning) {
-                    bleController.targetDeviceName?.let { bleController.startScan(it) } ?: bleController.startScan()
-                }
-            },
-            leadingIcon = {
-                Icon(
-                    Icons.Filled.Circle,
-                    contentDescription = null,
-                    tint = statusColor,
-                    modifier = Modifier.size(10.dp)
-                )
-            },
-            shape = RoundedCornerShape(25.dp),
-            border = BorderStroke(
-                1.dp,
-                MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-            )
-        )
     }
 }
 
@@ -155,10 +125,11 @@ fun BluetoothSettingsCard(bleController: BleController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp)),
+            .clip(RoundedCornerShape(24.dp))
+            .glassEffect(cornerRadius = 24.dp, alpha = 0.1f),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = Color.Transparent
         )
     ) {
         Column(
@@ -205,7 +176,7 @@ fun BluetoothSettingsCard(bleController: BleController) {
                     )
                     Text(
                         text = if (bleController.targetDeviceName != null) 
-                            "Target: ${bleController.targetDeviceName}" 
+                            "Target: ${bleController.targetDeviceName}"
                             else "No target device selected",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant

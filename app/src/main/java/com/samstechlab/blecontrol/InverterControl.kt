@@ -89,10 +89,11 @@ fun InverterSwitchCard(car: Car, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(24.dp))
+            .glassEffect(cornerRadius = 24.dp, alpha = 0.1f)
             .aiGlow(automaticMode, 24.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = Color.Transparent
         )
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
