@@ -61,10 +61,10 @@ fun Modifier.glassEffect(
                         center = point
                     )
                 }
-                
+
                 // 2. Surface specular highlight
                 drawRect(brush = specularBrush)
-                
+
                 // 3. Base tint
                 drawRect(color = finalColor.copy(alpha = alpha))
 

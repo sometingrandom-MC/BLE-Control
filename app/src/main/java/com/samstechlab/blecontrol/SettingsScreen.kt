@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(car: Car) {
+fun SettingsScreen(car: Car, onChangeDevice: () -> Unit) {
     val bleController = car.bleController ?: return
 
     Scaffold(
@@ -76,7 +76,7 @@ fun SettingsScreen(car: Car) {
             }
 
             StaggeredEntrance(index = 1) {
-                BluetoothSettingsCard(bleController)
+                BluetoothSettingsCard(bleController, onChangeDevice)
             }
 
             StaggeredEntrance(index = 2) {
@@ -121,7 +121,7 @@ fun SettingsScreen(car: Car) {
 }
 
 @Composable
-fun BluetoothSettingsCard(bleController: BleController) {
+fun BluetoothSettingsCard(bleController: BleController, onChangeDevice: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -219,7 +219,7 @@ fun BluetoothSettingsCard(bleController: BleController) {
                 }
 
                 Button(
-                    onClick = { bleController.targetDeviceName = null },
+                    onClick = onChangeDevice,
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Change")

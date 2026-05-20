@@ -7,7 +7,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -56,7 +55,6 @@ fun AnimatedBackground(modifier: Modifier = Modifier) {
 
     Spacer(
         modifier = modifier
-            .fillMaxSize()
             .drawWithCache {
                 onDrawBehind {
                     drawRect(color = surfaceColor)
