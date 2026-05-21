@@ -58,20 +58,22 @@ fun TypewriterText(
     lineHeight: androidx.compose.ui.unit.TextUnit = style.lineHeight
 ) {
     var visibleCharCount by remember(stableKey) { mutableIntStateOf(0) }
+    var hasFinished by remember(stableKey) { mutableStateOf(false) }
     
     LaunchedEffect(stableKey) {
         visibleCharCount = 0
+        hasFinished = false
         for (i in text.indices) {
             delay(delayMillis)
             visibleCharCount = i + 1
         }
+        hasFinished = true
         onAnimationFinish()
     }
 
-    // If stableKey is the same, we show the text up to visibleCharCount.
-    // If typing is finished (or if the new text is shorter than what we've "typed"),
-    // we just show the text as is (or capped).
-    val displayedText = if (visibleCharCount >= text.length) {
+    // If stableKey is the same, we show the text up to visibleCharCount if not finished.
+    // Once finished, we show the full text even if it updates (to prevent re-typing).
+    val displayedText = if (hasFinished) {
         text
     } else {
         text.take(visibleCharCount)
@@ -139,6 +141,7 @@ fun IntelligentCard(car: Car, modifier: Modifier = Modifier) {
 
         AnimatedContent(
             targetState = displayedInsight,
+            contentKey = { it.stableKey },
             transitionSpec = {
                 if (initialState.stableKey == targetState.stableKey) {
                     EnterTransition.None togetherWith ExitTransition.None
