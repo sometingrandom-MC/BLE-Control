@@ -1,6 +1,8 @@
 package com.samstechlab.blecontrol
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -136,30 +138,36 @@ fun IntelligentCard(car: Car, modifier: Modifier = Modifier) {
         }
 
         AnimatedContent(
-            targetState = displayedInsight.stableKey,
+            targetState = displayedInsight,
             transitionSpec = {
-                fadeIn(animationSpec = androidx.compose.animation.core.tween(500)) togetherWith 
-                fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                if (initialState.stableKey == targetState.stableKey) {
+                    EnterTransition.None togetherWith ExitTransition.None
+                } else {
+                    fadeIn(animationSpec = androidx.compose.animation.core.tween(500)) togetherWith
+                            fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                }
             },
             label = "insightAnimation"
-        ) { _ ->
+        ) { insight ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
-                    imageVector = displayedInsight.icon,
+                    imageVector = insight.icon,
                     contentDescription = null,
-                    tint = displayedInsight.color ?: MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = insight.color ?: MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(32.dp)
                 )
-                
+
                 TypewriterText(
-                    text = displayedInsight.text,
-                    stableKey = displayedInsight.stableKey,
+                    text = insight.text,
+                    stableKey = insight.stableKey,
                     onAnimationFinish = {
-                        isTyping = false
+                        if (insight.stableKey == displayedInsight.stableKey) {
+                            isTyping = false
+                        }
                     },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
