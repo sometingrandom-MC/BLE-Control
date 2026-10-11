@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import java.util.*
+import androidx.core.content.edit
 
 class BleController(private val context: Context) {
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -33,7 +34,7 @@ class BleController(private val context: Context) {
         get() = _targetDeviceName.value
         set(value) {
             _targetDeviceName.value = value
-            prefs.edit().putString("target_device_name", value).apply()
+            prefs.edit { putString("target_device_name", value) }
         }
 
     private val reconnectHandler = Handler(Looper.getMainLooper())
