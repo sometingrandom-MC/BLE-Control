@@ -84,6 +84,7 @@ class BleController(private val context: Context) {
                     bluetoothGatt = null
                     descriptorWriteQueue.clear()
                     isWritingDescriptor = false
+                    gatt.close()
                 }
                 callback?.onConnectionStateChange(isConnected)
             }
@@ -187,7 +188,7 @@ class BleController(private val context: Context) {
     @SuppressLint("MissingPermission")
     fun connect(deviceAddress: String) {
         val device = bluetoothAdapter.getRemoteDevice(deviceAddress)
-        bluetoothGatt = device.connectGatt(context, false, gattCallback)
+        bluetoothGatt = device.connectGatt(context, true, gattCallback)
     }
 
     @SuppressLint("MissingPermission")
