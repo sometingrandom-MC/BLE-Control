@@ -4,6 +4,7 @@ BLE Control is an app that controls devices over Bluetooth Low Energy. This allo
 - Material 3 Expressive Design
 - Easy to use controls that have support for tap and hold actions.
 - Beautiful animations
+- Tablet and foldable support
 ### Future Roadmap
 - Customizable configurations for different devices in app
 - Quick switching between devices
